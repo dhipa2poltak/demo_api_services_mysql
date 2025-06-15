@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -16,13 +19,24 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public String register(@RequestBody AuthRequest request) {
+    public Map<String, String> register(@RequestBody AuthRequest request) {
         return authService.register(request.getUsername(), request.getPassword());
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody AuthRequest request) {
+    public Map<String, String> login(@RequestBody AuthRequest request) {
         return authService.login(request.getUsername(), request.getPassword());
+    }
+
+    @PostMapping("/refresh")
+    public Map<String, String> refreshToken(@RequestBody Map<String, String> req) {
+        String refreshToken = req.get("refreshToken");
+        String newAccessToken = authService.refresh(refreshToken);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("accessToken", newAccessToken);
+
+        return result;
     }
 }
 
