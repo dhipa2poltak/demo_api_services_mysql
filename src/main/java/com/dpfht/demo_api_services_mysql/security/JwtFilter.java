@@ -1,7 +1,10 @@
 package com.dpfht.demo_api_services_mysql.security;
 
 import com.dpfht.demo_api_services_mysql.model.User;
+import com.dpfht.demo_api_services_mysql.repository.AccessTokenRepository;
 import com.dpfht.demo_api_services_mysql.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +20,12 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
-    public JwtFilter(JwtUtil jwtUtil, UserRepository userRepository) {
+    private final AccessTokenRepository accessTokenRepository;
+
+    public JwtFilter(JwtUtil jwtUtil, UserRepository userRepository, AccessTokenRepository accessTokenRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.accessTokenRepository = accessTokenRepository;
     }
 
     @Override
@@ -27,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            if (jwtUtil.validateToken(token)) {
+            if (isValidAccessToken(token)) {
                 String username = jwtUtil.extractUsername(token);
                 User user = userRepository.findByUsername(username).orElse(null);
                 if (user != null) {
@@ -38,5 +44,19 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    public boolean isValidAccessToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(JwtUtil.key).build().parseClaimsJws(token);
+
+            boolean retval = accessTokenRepository.findByToken(token)
+                    .map(t -> !t.isRevoked())
+                    .orElse(false);
+
+            return retval;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 }

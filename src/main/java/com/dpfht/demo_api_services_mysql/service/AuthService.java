@@ -1,10 +1,14 @@
 package com.dpfht.demo_api_services_mysql.service;
 
+import com.dpfht.demo_api_services_mysql.model.AccessToken;
 import com.dpfht.demo_api_services_mysql.model.RefreshToken;
 import com.dpfht.demo_api_services_mysql.model.User;
+import com.dpfht.demo_api_services_mysql.repository.AccessTokenRepository;
 import com.dpfht.demo_api_services_mysql.repository.RefreshTokenRepository;
 import com.dpfht.demo_api_services_mysql.repository.UserRepository;
 import com.dpfht.demo_api_services_mysql.security.JwtUtil;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +26,13 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private RefreshTokenRepository refreshTokenRepo;
+
+    @Autowired
+    private AccessTokenRepository accessTokenRepository;
 
     public Map<String, String> register(String username, String password) {
         if (userRepo.findByUsername(username).isPresent()) {
@@ -59,7 +69,17 @@ public class AuthService {
                 RefreshToken.builder()
                         .token(refreshToken)
                         .user(user)
+                        .revoked(false)
                         .expiryDate(new Date(System.currentTimeMillis() + JwtUtil.EXPIRATION_REFRESH_TOKEN))
+                        .build()
+        );
+
+        accessTokenRepository.deleteByUser(user);
+        accessTokenRepository.save(
+                AccessToken.builder()
+                        .token(accessToken)
+                        .user(user)
+                        .revoked(false)
                         .build()
         );
 
@@ -71,7 +91,7 @@ public class AuthService {
     }
 
     public String refresh(String refreshToken) {
-        if (!jwtUtil.validateToken(refreshToken)) {
+        if (!isValidRefreshToken(refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
         }
 
@@ -79,7 +99,43 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Token not found"));
 
         String username = jwtUtil.extractUsername(refreshToken);
+        String accessToken = jwtUtil.generateAccessToken(username);
 
-        return jwtUtil.generateAccessToken(username);
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        accessTokenRepository.deleteByUser(user);
+        accessTokenRepository.save(
+                AccessToken.builder()
+                        .token(accessToken)
+                        .user(user)
+                        .revoked(false)
+                        .build()
+        );
+
+        return accessToken;
+    }
+
+    public boolean isValidRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(JwtUtil.key).build().parseClaimsJws(token);
+
+            return refreshTokenRepo.findByToken(token)
+                    .map(t -> !t.isRevoked())
+                    .orElse(false);
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
+    public void logout(String refreshToken, String accessToken) {
+        refreshTokenRepo.findByToken(refreshToken).ifPresent(rt -> {
+            rt.setRevoked(true);
+            refreshTokenRepo.save(rt);
+        });
+
+        accessTokenRepository.findByToken(accessToken).ifPresent(rt -> {
+            rt.setRevoked(true);
+            accessTokenRepository.save(rt);
+        });
     }
 }

@@ -3,6 +3,7 @@ package com.dpfht.demo_api_services_mysql.controller;
 import com.dpfht.demo_api_services_mysql.service.AuthService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,10 +39,37 @@ public class AuthController {
 
         return result;
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest request) {
+        String refreshToken = "";
+        String accessToken = "";
+
+        if (request.getRefreshToken() != null) {
+            refreshToken = request.getRefreshToken();
+        }
+
+        // Revoke Access Token
+        if (request.getAccessToken() != null) {
+            accessToken = request.getAccessToken();
+        }
+
+        if (!refreshToken.isEmpty() && !accessToken.isEmpty()) {
+            authService.logout(refreshToken, accessToken);
+        }
+
+        return ResponseEntity.ok("Access and refresh tokens revoked successfully.");
+    }
 }
 
 @Data
 class AuthRequest {
     private String username;
     private String password;
+}
+
+@Data
+class LogoutRequest {
+    private String refreshToken;
+    private String accessToken;
 }
