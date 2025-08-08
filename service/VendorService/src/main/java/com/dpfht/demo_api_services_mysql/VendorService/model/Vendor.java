@@ -1,4 +1,4 @@
-package com.dpfht.demo_api_services_mysql.model;
+package com.dpfht.demo_api_services_mysql.VendorService.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

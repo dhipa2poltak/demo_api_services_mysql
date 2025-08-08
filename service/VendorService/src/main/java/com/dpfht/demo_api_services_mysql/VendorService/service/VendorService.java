@@ -1,7 +1,7 @@
-package com.dpfht.demo_api_services_mysql.service;
+package com.dpfht.demo_api_services_mysql.VendorService.service;
 
-import com.dpfht.demo_api_services_mysql.model.Vendor;
-import com.dpfht.demo_api_services_mysql.repository.VendorRepository;
+import com.dpfht.demo_api_services_mysql.VendorService.model.Vendor;
+import com.dpfht.demo_api_services_mysql.VendorService.repository.VendorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
