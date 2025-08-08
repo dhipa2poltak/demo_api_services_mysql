@@ -1,2 +1,3 @@
 rootProject.name = 'demo_api_services_mysql'
 include ':service:VendorService'
+include ':service:ProductService'

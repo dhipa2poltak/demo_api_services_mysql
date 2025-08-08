@@ -1,7 +1,7 @@
-package com.dpfht.demo_api_services_mysql.service;
+package com.dpfht.demo_api_services_mysql.ProductService.service;
 
-import com.dpfht.demo_api_services_mysql.model.Product;
-import com.dpfht.demo_api_services_mysql.repository.ProductRepository;
+import com.dpfht.demo_api_services_mysql.ProductService.model.Product;
+import com.dpfht.demo_api_services_mysql.ProductService.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

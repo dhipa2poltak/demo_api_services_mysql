@@ -1,7 +1,7 @@
-package com.dpfht.demo_api_services_mysql.controller;
+package com.dpfht.demo_api_services_mysql.ProductService.controller;
 
-import com.dpfht.demo_api_services_mysql.model.Product;
-import com.dpfht.demo_api_services_mysql.service.ProductService;
+import com.dpfht.demo_api_services_mysql.ProductService.model.Product;
+import com.dpfht.demo_api_services_mysql.ProductService.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
