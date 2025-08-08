@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS access_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    revoked BOOLEAN NOT NULL,
+    user_id BIGINT,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES user(id)
+);
+
+CREATE TABLE IF NOT EXISTS refresh_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id BIGINT,
+    expiry_date DATETIME,
+    revoked BOOLEAN NOT NULL,
+    CONSTRAINT fk_refresh_user FOREIGN KEY (user_id) REFERENCES user(id)
+);
