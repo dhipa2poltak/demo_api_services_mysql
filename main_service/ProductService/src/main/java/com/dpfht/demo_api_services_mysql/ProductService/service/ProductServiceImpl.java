@@ -33,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
         Product existing = findById(id);
         existing.setName(product.getName());
         existing.setPrice(product.getPrice());
+        existing.setVendorId(product.getVendorId());
         return repo.save(existing);
     }
 
