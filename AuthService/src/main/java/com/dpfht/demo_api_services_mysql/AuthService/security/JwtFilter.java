@@ -48,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     public boolean isValidAccessToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(JwtUtil.key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(jwtUtil.key()).build().parseClaimsJws(token);
 
             boolean retval = accessTokenRepository.findByToken(token)
                     .map(t -> !t.isRevoked())

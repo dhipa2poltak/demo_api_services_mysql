@@ -117,7 +117,7 @@ public class AuthService {
 
     public boolean isValidRefreshToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(JwtUtil.key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(jwtUtil.key()).build().parseClaimsJws(token);
 
             return refreshTokenRepo.findByToken(token)
                     .map(t -> !t.isRevoked())
